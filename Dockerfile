@@ -32,5 +32,9 @@ ENV AWS_IAM_AUTHENTICATOR_VERSION 1.12.7/2019-03-27
 RUN curl -L -o ${INSTALL_DIR}/aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/${AWS_IAM_AUTHENTICATOR_VERSION}/bin/linux/amd64/aws-iam-authenticator && \
   chmod +x ${INSTALL_DIR}/aws-iam-authenticator
 
+ENV KUBECTL_VERSION v1.14.0
+RUN curl -L -o ${INSTALL_DIR}/kubectl https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl && \
+  chmod +x ${INSTALL_DIR}/kubectl
+
 COPY --from=builder /go/bin/drone-terraform ${INSTALL_DIR}/
 ENTRYPOINT ["drone-terraform"]
