@@ -2,6 +2,7 @@
 * Forked from https://github.com/jmccann/drone-terraform
 * Update Dockerfile to install aws-iam-authenticator
 * Change module name and Docker image names from jmccann to GetTerminus
+* Update embedded TF to `0.11.13`
 
 ## 5.2-0.11.11 (2019-02-22)
 * Add `fmt` action
