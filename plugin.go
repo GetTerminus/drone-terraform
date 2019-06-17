@@ -116,13 +116,15 @@ func (p Plugin) Exec() error {
 			commands = append(commands, tfApply(p.Config))
 		case "destroy":
 			commands = append(commands, tfDestroy(p.Config))
+		case "interact":
+			commands = append(commands, tfInteract(p.Config))
 		case "import":
 			if len(actions) != 3 {
 				return fmt.Errorf("import must be called with a target resource and a resource ID, see https://www.terraform.io/docs/import/usage.html")
 			}
 			commands = append(commands, tfImport(p.Config, actions[1], actions[2]))
 		default:
-			return fmt.Errorf("valid actions are: fmt, validate, plan, apply, plan-destroy, destroy, import.  You provided %s", action)
+			return fmt.Errorf("valid actions are: fmt, validate, plan, apply, plan-destroy, destroy, interact, import.  You provided %s", actions[0])
 		}
 	}
 
@@ -378,6 +380,16 @@ func tfFmt(config Config) *exec.Cmd {
 	}
 	return exec.Command(
 		"terraform",
+		args...,
+	)
+}
+
+func tfInteract(config Config) *exec.Cmd {
+	args := []string{
+		"1h",
+	}
+	return exec.Command(
+		"sleep",
 		args...,
 	)
 }
