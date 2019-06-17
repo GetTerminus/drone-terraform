@@ -8,6 +8,7 @@ import (
 	"os/user"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -102,7 +103,8 @@ func (p Plugin) Exec() error {
 
 	// Add commands listed from Actions
 	for _, action := range p.Config.Actions {
-		switch action {
+		actions := strings.Split(action, " ")
+		switch actions[0] {
 		case "fmt":
 			commands = append(commands, tfFmt(p.Config))
 		case "validate":
@@ -117,8 +119,13 @@ func (p Plugin) Exec() error {
 			commands = append(commands, tfDestroy(p.Config))
 		case "interact":
 			commands = append(commands, tfInteract(p.Config))
+		case "import":
+			if len(actions) != 3 {
+				return fmt.Errorf("import must be called with a target resource and a resource ID, see https://www.terraform.io/docs/import/usage.html")
+			}
+			commands = append(commands, tfImport(p.Config, actions[1], actions[2]))
 		default:
-			return fmt.Errorf("valid actions are: fmt, validate, plan, apply, plan-destroy, destroy, interact.  You provided %s", action)
+			return fmt.Errorf("valid actions are: fmt, validate, plan, apply, plan-destroy, destroy, interact, import.  You provided %s", actions[0])
 		}
 	}
 
@@ -287,6 +294,28 @@ func tfDestroy(config Config) *exec.Cmd {
 	)
 }
 
+func tfImport(config Config, target string, id string) *exec.Cmd {
+	args := []string {
+		"import",
+	}
+
+	args = append(args, varFiles(config.VarFiles)...)
+	args = append(args, vars(config.Vars)...)
+	if config.InitOptions.Lock != nil {
+		args = append(args, fmt.Sprintf("-lock=%t", *config.InitOptions.Lock))
+	}
+	if config.InitOptions.LockTimeout != "" {
+		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
+	}
+
+	args = append(args, target, id)
+
+	return exec.Command(
+		"terraform",
+		args...
+	)
+}
+
 func tfPlan(config Config, destroy bool) *exec.Cmd {
 	args := []string{
 		"plan",
@@ -367,9 +396,16 @@ func tfInteract(config Config) *exec.Cmd {
 }
 
 func vars(vs map[string]string) []string {
+	var keys []string
+	for k := range vs {
+		keys = append(keys, k)
+	}
+
+	sort.Strings(keys)
+
 	var args []string
-	for k, v := range vs {
-		args = append(args, "-var", fmt.Sprintf("%s=%s", k, v))
+	for _, k := range keys {
+		args = append(args, "-var", fmt.Sprintf("%s=%s", k, vs[k]))
 	}
 	return args
 }
