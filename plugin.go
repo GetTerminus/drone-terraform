@@ -115,8 +115,10 @@ func (p Plugin) Exec() error {
 			commands = append(commands, tfApply(p.Config))
 		case "destroy":
 			commands = append(commands, tfDestroy(p.Config))
+		case "interact":
+			commands = append(commands, tfInteract(p.Config))
 		default:
-			return fmt.Errorf("valid actions are: fmt, validate, plan, apply, plan-destroy, destroy.  You provided %s", action)
+			return fmt.Errorf("valid actions are: fmt, validate, plan, apply, plan-destroy, destroy, interact.  You provided %s", action)
 		}
 	}
 
@@ -350,6 +352,16 @@ func tfFmt(config Config) *exec.Cmd {
 	}
 	return exec.Command(
 		"terraform",
+		args...,
+	)
+}
+
+func tfInteract(config Config) *exec.Cmd {
+	args := []string{
+		"1h",
+	}
+	return exec.Command(
+		"sleep",
 		args...,
 	)
 }
