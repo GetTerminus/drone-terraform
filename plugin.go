@@ -102,7 +102,8 @@ func (p Plugin) Exec() error {
 
 	// Add commands listed from Actions
 	for _, action := range p.Config.Actions {
-		switch action {
+		actions := strings.Split(action, " ")
+		switch actions[0] {
 		case "fmt":
 			commands = append(commands, tfFmt(p.Config))
 		case "validate":
@@ -115,8 +116,13 @@ func (p Plugin) Exec() error {
 			commands = append(commands, tfApply(p.Config))
 		case "destroy":
 			commands = append(commands, tfDestroy(p.Config))
+		case "import":
+			if len(actions) != 3 {
+				return fmt.Errorf("import must be called with a target resource and a resource ID, see https://www.terraform.io/docs/import/usage.html")
+			}
+			commands = append(commands, tfImport(p.Config, actions[1], actions[2]))
 		default:
-			return fmt.Errorf("valid actions are: fmt, validate, plan, apply, plan-destroy, destroy.  You provided %s", action)
+			return fmt.Errorf("valid actions are: fmt, validate, plan, apply, plan-destroy, destroy, import.  You provided %s", action)
 		}
 	}
 
@@ -282,6 +288,28 @@ func tfDestroy(config Config) *exec.Cmd {
 	return exec.Command(
 		"terraform",
 		args...,
+	)
+}
+
+func tfImport(config Config, target string, id string) *exec.Cmd {
+	args := []string {
+		"import",
+	}
+
+	args = append(args, varFiles(config.VarFiles)...)
+	args = append(args, vars(config.Vars)...)
+	if config.InitOptions.Lock != nil {
+		args = append(args, fmt.Sprintf("-lock=%t", *config.InitOptions.Lock))
+	}
+	if config.InitOptions.LockTimeout != "" {
+		args = append(args, fmt.Sprintf("-lock-timeout=%s", config.InitOptions.LockTimeout))
+	}
+
+	args = append(args, target, id)
+
+	return exec.Command(
+		"terraform",
+		args...
 	)
 }
 
