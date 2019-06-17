@@ -8,6 +8,7 @@ import (
 	"os/user"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -395,9 +396,16 @@ func tfInteract(config Config) *exec.Cmd {
 }
 
 func vars(vs map[string]string) []string {
+	var keys []string
+	for k := range vs {
+		keys = append(keys, k)
+	}
+
+	sort.Strings(keys)
+
 	var args []string
-	for k, v := range vs {
-		args = append(args, "-var", fmt.Sprintf("%s=%s", k, v))
+	for _, k := range keys {
+		args = append(args, "-var", fmt.Sprintf("%s=%s", k, vs[k]))
 	}
 	return args
 }

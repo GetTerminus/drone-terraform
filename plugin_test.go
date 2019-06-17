@@ -94,7 +94,7 @@ func TestPlugin(t *testing.T) {
 				{
 					"with vars",
 					args{config: Config{Vars: map[string]string{"username": "someuser", "password": "1pass"}}},
-					exec.Command("terraform", "destroy", "-var", "username=someuser", "-var", "password=1pass", "-force"),
+					exec.Command("terraform", "destroy", "-var", "password=1pass", "-var", "username=someuser", "-force"),
 				},
 				{
 					"with var-files",
@@ -140,7 +140,7 @@ func TestPlugin(t *testing.T) {
 				{
 					"with vars",
 					args{config: Config{Vars: map[string]string{"username": "someuser", "password": "1pass"}}, target: "foo", id: "bar"},
-					exec.Command("terraform", "import", "-var", "username=someuser", "-var", "password=1pass", "foo", "bar"),
+					exec.Command("terraform", "import", "-var", "password=1pass", "-var", "username=someuser", "foo", "bar"),
 				},
 				{
 					"with var-files",
@@ -183,7 +183,7 @@ func TestPlugin(t *testing.T) {
 					"with vars",
 					args{config: Config{Vars: map[string]string{"username": "someuser", "password": "1pass"}}},
 					false,
-					exec.Command("terraform", "plan", "-out=plan.tfout", "-var", "username=someuser", "-var", "password=1pass"),
+					exec.Command("terraform", "plan", "-out=plan.tfout", "-var", "password=1pass", "-var", "username=someuser"),
 				},
 				{
 					"with var-files",
