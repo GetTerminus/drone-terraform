@@ -1,4 +1,4 @@
-## Master Status: [![Terraform Apply Actions Status](https://github.com/GetTerminus/eks-infra/workflows/Terraform%20Apply/badge.svg?branch=master)](https://github.com/GetTerminus/eks-infra/actions)
+## Master Status: 
 - [ ] Reviewed the Terraform Plan
 - [ ] I promise to make sure that master is green before merging into it. 
 
